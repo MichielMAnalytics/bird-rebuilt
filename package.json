@@ -1,0 +1,27 @@
+{
+  "name": "bird-rebuilt",
+  "version": "1.0.0",
+  "description": "X/Twitter CLI client using undocumented GraphQL API with cookie auth",
+  "type": "module",
+  "bin": {
+    "bird": "./dist/cli.js"
+  },
+  "main": "./dist/lib/index.js",
+  "types": "./dist/lib/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js",
+    "clean": "rm -rf dist"
+  },
+  "keywords": ["twitter", "x", "cli", "graphql"],
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^13.1.0",
+    "kleur": "^4.1.5"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.3",
+    "@types/node": "^22.12.0"
+  }
+}

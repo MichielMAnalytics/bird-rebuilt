@@ -1,0 +1,710 @@
+import { applyFeatureOverrides } from './runtime-features.js';
+
+// ---------------------------------------------------------------------------
+// Article features (base for tweet detail, search, etc.)
+// ---------------------------------------------------------------------------
+
+export function buildArticleFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    subscriptions_upsells_api_enabled: false,
+    hidden_profile_subscriptions_enabled: false,
+    subscriptions_feature_can_gift_premium: false,
+    subscriptions_verification_info_is_identity_verified_enabled: false,
+    responsive_web_twitter_article_notes_tab_enabled: true,
+    highlights_tweets_tab_ui_enabled: true,
+    subscriptions_verification_info_verified_since_enabled: true,
+  };
+  return applyFeatureOverrides('article', features);
+}
+
+// ---------------------------------------------------------------------------
+// Tweet detail features (extends article)
+// ---------------------------------------------------------------------------
+
+export function buildTweetDetailFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    // Tweet detail additions
+    responsive_web_twitter_article_plain_text_enabled: true,
+    responsive_web_twitter_article_seed_tweet_detail_enabled: true,
+    responsive_web_twitter_article_seed_tweet_summary_enabled: true,
+  };
+  return applyFeatureOverrides('tweetDetail', features);
+}
+
+// ---------------------------------------------------------------------------
+// Article field toggles
+// ---------------------------------------------------------------------------
+
+export function buildArticleFieldToggles(): Record<string, boolean> {
+  return {
+    withPayments: false,
+    withAuxiliaryUserLabels: false,
+    withArticleRichContentState: true,
+    withArticlePlainText: true,
+    withGrokAnalyze: false,
+    withDisallowedReplyControls: false,
+  };
+}
+
+// ---------------------------------------------------------------------------
+// Search features (article + rweb_video_timestamps_enabled)
+// ---------------------------------------------------------------------------
+
+export function buildSearchFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    // Search addition
+    rweb_video_timestamps_enabled: true,
+  };
+  return applyFeatureOverrides('search', features);
+}
+
+// ---------------------------------------------------------------------------
+// Tweet create features
+// ---------------------------------------------------------------------------
+
+export function buildTweetCreateFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+  };
+  return applyFeatureOverrides('tweetCreate', features);
+}
+
+// ---------------------------------------------------------------------------
+// Timeline features (search base + timeline-specific additions)
+// ---------------------------------------------------------------------------
+
+export function buildTimelineFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    // Search base
+    rweb_video_timestamps_enabled: true,
+    // Timeline additions
+    blue_business_profile_image_shape_enabled: true,
+    responsive_web_text_conversations_enabled: false,
+    tweetypie_unmention_optimization_enabled: true,
+    vibe_api_enabled: true,
+    responsive_web_twitter_blue_verified_badge_is_enabled: true,
+    interactive_text_enabled: true,
+    longform_notetweets_richtext_consumption_enabled: true,
+    responsive_web_media_download_video_enabled: false,
+  };
+  return applyFeatureOverrides('timeline', features);
+}
+
+// ---------------------------------------------------------------------------
+// Bookmarks features (timeline + bookmark-specific)
+// ---------------------------------------------------------------------------
+
+export function buildBookmarksFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    rweb_video_timestamps_enabled: true,
+    blue_business_profile_image_shape_enabled: true,
+    responsive_web_text_conversations_enabled: false,
+    tweetypie_unmention_optimization_enabled: true,
+    vibe_api_enabled: true,
+    responsive_web_twitter_blue_verified_badge_is_enabled: true,
+    interactive_text_enabled: true,
+    longform_notetweets_richtext_consumption_enabled: true,
+    responsive_web_media_download_video_enabled: false,
+    // Bookmarks addition
+    graphql_timeline_v2_bookmark_timeline: true,
+  };
+  return applyFeatureOverrides('bookmarks', features);
+}
+
+// ---------------------------------------------------------------------------
+// Likes features (same as timeline)
+// ---------------------------------------------------------------------------
+
+export function buildLikesFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    rweb_video_timestamps_enabled: true,
+    blue_business_profile_image_shape_enabled: true,
+    responsive_web_text_conversations_enabled: false,
+    tweetypie_unmention_optimization_enabled: true,
+    vibe_api_enabled: true,
+    responsive_web_twitter_blue_verified_badge_is_enabled: true,
+    interactive_text_enabled: true,
+    longform_notetweets_richtext_consumption_enabled: true,
+    responsive_web_media_download_video_enabled: false,
+  };
+  return applyFeatureOverrides('likes', features);
+}
+
+// ---------------------------------------------------------------------------
+// Lists features (standalone set)
+// ---------------------------------------------------------------------------
+
+export function buildListsFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    rweb_video_timestamps_enabled: true,
+  };
+  return applyFeatureOverrides('lists', features);
+}
+
+// ---------------------------------------------------------------------------
+// Home timeline features (same as timeline)
+// ---------------------------------------------------------------------------
+
+export function buildHomeTimelineFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    rweb_video_timestamps_enabled: true,
+    blue_business_profile_image_shape_enabled: true,
+    responsive_web_text_conversations_enabled: false,
+    tweetypie_unmention_optimization_enabled: true,
+    vibe_api_enabled: true,
+    responsive_web_twitter_blue_verified_badge_is_enabled: true,
+    interactive_text_enabled: true,
+    longform_notetweets_richtext_consumption_enabled: true,
+    responsive_web_media_download_video_enabled: false,
+  };
+  return applyFeatureOverrides('homeTimeline', features);
+}
+
+// ---------------------------------------------------------------------------
+// User tweets features (standalone set)
+// ---------------------------------------------------------------------------
+
+export function buildUserTweetsFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    rweb_video_timestamps_enabled: true,
+    blue_business_profile_image_shape_enabled: true,
+    responsive_web_text_conversations_enabled: false,
+    tweetypie_unmention_optimization_enabled: true,
+    vibe_api_enabled: true,
+    responsive_web_twitter_blue_verified_badge_is_enabled: true,
+    interactive_text_enabled: true,
+    longform_notetweets_richtext_consumption_enabled: true,
+    responsive_web_media_download_video_enabled: false,
+  };
+  return applyFeatureOverrides('userTweets', features);
+}
+
+// ---------------------------------------------------------------------------
+// Following features (standalone set)
+// ---------------------------------------------------------------------------
+
+export function buildFollowingFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    rweb_video_timestamps_enabled: true,
+    blue_business_profile_image_shape_enabled: true,
+    responsive_web_text_conversations_enabled: false,
+    tweetypie_unmention_optimization_enabled: true,
+    vibe_api_enabled: true,
+    responsive_web_twitter_blue_verified_badge_is_enabled: true,
+    interactive_text_enabled: true,
+    longform_notetweets_richtext_consumption_enabled: true,
+    responsive_web_media_download_video_enabled: false,
+  };
+  return applyFeatureOverrides('following', features);
+}
+
+// ---------------------------------------------------------------------------
+// Explore features (standalone set)
+// ---------------------------------------------------------------------------
+
+export function buildExploreFeatures(): Record<string, boolean> {
+  const features: Record<string, boolean> = {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+    rweb_video_timestamps_enabled: true,
+  };
+  return applyFeatureOverrides('explore', features);
+}
+
+// ---------------------------------------------------------------------------
+// Backward-compatible helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Returns a default feature set (equivalent to article features without
+ * runtime overrides). Kept for backward compatibility.
+ */
+export function getDefaultFeatures(): Record<string, boolean> {
+  return {
+    rweb_video_screen_enabled: true,
+    profile_label_improvements_pcf_label_in_post_enabled: true,
+    responsive_web_profile_redirect_enabled: true,
+    rweb_tipjar_consumption_enabled: true,
+    verified_phone_label_enabled: false,
+    creator_subscriptions_tweet_preview_api_enabled: true,
+    responsive_web_graphql_timeline_navigation_enabled: true,
+    responsive_web_graphql_exclude_directive_enabled: true,
+    responsive_web_graphql_skip_user_profile_image_extensions_enabled: false,
+    premium_content_api_read_enabled: false,
+    communities_web_enable_tweet_community_results_fetch: true,
+    c9s_tweet_anatomy_moderator_badge_enabled: true,
+    responsive_web_grok_analyze_button_fetch_trends_enabled: false,
+    responsive_web_grok_analyze_post_followups_enabled: false,
+    responsive_web_grok_annotations_enabled: false,
+    responsive_web_jetfuel_frame: true,
+    post_ctas_fetch_enabled: true,
+    responsive_web_grok_share_attachment_enabled: true,
+    articles_preview_enabled: true,
+    responsive_web_edit_tweet_api_enabled: true,
+    graphql_is_translatable_rweb_tweet_is_translatable_enabled: true,
+    view_counts_everywhere_api_enabled: true,
+    longform_notetweets_consumption_enabled: true,
+    responsive_web_twitter_article_tweet_consumption_enabled: true,
+    tweet_awards_web_tipping_enabled: false,
+    responsive_web_grok_show_grok_translated_post: false,
+    responsive_web_grok_analysis_button_from_backend: true,
+    creator_subscriptions_quote_tweet_preview_enabled: false,
+    freedom_of_speech_not_reach_fetch_enabled: true,
+    standardized_nudges_misinfo: true,
+    tweet_with_visibility_results_prefer_gql_limited_actions_policy_enabled: true,
+    longform_notetweets_rich_text_read_enabled: true,
+    longform_notetweets_inline_media_enabled: true,
+    responsive_web_grok_image_annotation_enabled: true,
+    responsive_web_grok_imagine_annotation_enabled: true,
+    responsive_web_grok_community_note_auto_translation_is_enabled: false,
+    responsive_web_enhance_cards_enabled: false,
+  };
+}
+
+/**
+ * Merge overrides into the default feature set. Kept for backward compatibility.
+ */
+export function mergeFeatures(overrides: Record<string, boolean>): Record<string, boolean> {
+  return { ...getDefaultFeatures(), ...overrides };
+}
