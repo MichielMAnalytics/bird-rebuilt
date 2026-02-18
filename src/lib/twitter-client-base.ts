@@ -1,6 +1,10 @@
 import { randomBytes, randomUUID } from 'node:crypto';
 import { QUERY_IDS, TARGET_QUERY_ID_OPERATIONS, GRAPHQL_API_BASE, API_BASE } from './twitter-client-constants.js';
 import { runtimeQueryIds } from './runtime-query-ids.js';
+import { getSessionIdentity } from './session-store.js';
+import { collectBrowserCookies, buildCookieHeader, updateJarFromResponse } from './cookie-jar.js';
+import { createTransactionId, initTransactionClient } from './transaction-id.js';
+import { generateXpff } from './xpff.js';
 
 export interface TwitterCredentials {
   authToken: string;
@@ -10,6 +14,7 @@ export interface TwitterCredentials {
 export interface ClientOptions {
   credentials: TwitterCredentials;
   timeout?: number;
+  noJitter?: boolean;
 }
 
 export class TwitterClientBase {
@@ -17,17 +22,54 @@ export class TwitterClientBase {
   ct0: string;
   cookieHeader: string;
   timeoutMs: number | undefined;
+  noJitter: boolean;
   clientUuid: string;
   clientDeviceId: string;
   clientUserId?: string;
+  /** @internal */ _initialized = false;
+  /** @internal */ _initPromise: Promise<void> | null = null;
 
   constructor(options: ClientOptions) {
     this.authToken = options.credentials.authToken;
     this.ct0 = options.credentials.ct0;
     this.cookieHeader = `auth_token=${this.authToken}; ct0=${this.ct0}`;
     this.timeoutMs = options.timeout;
+    this.noJitter = options.noJitter ?? false;
     this.clientUuid = randomUUID();
     this.clientDeviceId = randomUUID();
+  }
+
+  async init(): Promise<void> {
+    if (this._initialized) return;
+    if (!this._initPromise) {
+      this._initPromise = (async () => {
+        // Load persisted session identity (stops UUID rotation)
+        try {
+          const session = await getSessionIdentity();
+          this.clientUuid = session.clientUuid;
+          this.clientDeviceId = session.clientDeviceId;
+        } catch {}
+
+        // Collect browser cookies from x.com
+        try {
+          await collectBrowserCookies();
+          this.cookieHeader = buildCookieHeader(this.authToken, this.ct0);
+        } catch {}
+
+        // Initialize transaction ID client (fetches x.com homepage + ondemand.s JS)
+        try {
+          await initTransactionClient();
+        } catch {}
+
+        this._initialized = true;
+      })();
+    }
+    await this._initPromise;
+  }
+
+  /** @internal */
+  async ensureInit(): Promise<void> {
+    if (!this._initialized) await this.init();
   }
 
   async sleep(ms: number): Promise<void> {
@@ -69,11 +111,8 @@ export class TwitterClientBase {
     return Array.from(new Set([primary, 'M1jEez78PEfVfbQLvlWMvQ', '5h0kNbk3ii97rmfY6CdgAA', 'Tp1sewRU1AsZpBWhqCZicQ']));
   }
 
-  createTransactionId(): string {
-    return randomBytes(16).toString('hex');
-  }
-
-  getBaseHeaders(): Record<string, string> {
+  getBaseHeaders(opts?: { method?: string; path?: string; transactionId?: string }): Record<string, string> {
+    const ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36';
     const headers: Record<string, string> = {
       'accept': '*/*',
       'accept-language': 'en-US,en;q=0.9',
@@ -84,18 +123,41 @@ export class TwitterClientBase {
       'x-twitter-client-language': 'en',
       'x-client-uuid': this.clientUuid,
       'x-twitter-client-deviceid': this.clientDeviceId,
-      'x-client-transaction-id': this.createTransactionId(),
+      'x-client-transaction-id': opts?.transactionId ?? randomBytes(16).toString('hex'),
       'cookie': this.cookieHeader,
-      'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+      'user-agent': ua,
       'origin': 'https://x.com',
       'referer': 'https://x.com/',
     };
     if (this.clientUserId) {
       headers['x-twitter-client-user-id'] = this.clientUserId;
     }
+    // Add X-XP-Forwarded-For if we have a guest_id
+    const xpff = generateXpff(ua);
+    if (xpff) {
+      headers['x-xp-forwarded-for'] = xpff;
+    }
     return headers;
   }
 
+  async getBaseHeadersAsync(method: string, urlOrPath: string): Promise<Record<string, string>> {
+    await this.ensureInit();
+    let apiPath: string;
+    try {
+      apiPath = new URL(urlOrPath).pathname;
+    } catch {
+      apiPath = urlOrPath;
+    }
+    const transactionId = await createTransactionId(method, apiPath);
+    return this.getBaseHeaders({ method, path: apiPath, transactionId });
+  }
+
+  async getJsonHeadersAsync(method: string, url: string): Promise<Record<string, string>> {
+    const base = await this.getBaseHeadersAsync(method, url);
+    return { ...base, 'content-type': 'application/json' };
+  }
+
+  // Sync versions for backward compat (uses random transaction ID)
   getJsonHeaders(): Record<string, string> {
     return { ...this.getBaseHeaders(), 'content-type': 'application/json' };
   }
@@ -105,16 +167,21 @@ export class TwitterClientBase {
   }
 
   async fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+    let response: Response;
     if (!this.timeoutMs || this.timeoutMs <= 0) {
-      return fetch(url, init);
+      response = await fetch(url, init);
+    } else {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), this.timeoutMs);
+      try {
+        response = await fetch(url, { ...init, signal: controller.signal });
+      } finally {
+        clearTimeout(timer);
+      }
     }
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.timeoutMs);
-    try {
-      return await fetch(url, { ...init, signal: controller.signal });
-    } finally {
-      clearTimeout(timer);
-    }
+    // Capture Set-Cookie from every response to keep jar fresh
+    try { updateJarFromResponse(response.headers); } catch {}
+    return response;
   }
 
   // Alias for backward compatibility
@@ -132,9 +199,10 @@ export class TwitterClientBase {
     ];
     for (const url of urls) {
       try {
+        const headers = await this.getJsonHeadersAsync('GET', url);
         const response = await this.fetchWithTimeout(url, {
           method: 'GET',
-          headers: this.getHeaders(),
+          headers,
         });
         if (!response.ok) continue;
         const data = await response.json() as any;
@@ -169,9 +237,10 @@ export class TwitterClientBase {
     if (opts?.features) params.set('features', JSON.stringify(opts.features));
     if (opts?.fieldToggles) params.set('fieldToggles', JSON.stringify(opts.fieldToggles));
     const url = `${GRAPHQL_API_BASE}/${qid}/${operation}?${params.toString()}`;
+    const headers = await this.getJsonHeadersAsync('GET', url);
     const response = await this.fetchWithTimeout(url, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
     if (!response.ok) {
       const text = await response.text().catch(() => '');
@@ -197,9 +266,10 @@ export class TwitterClientBase {
     const body: Record<string, any> = { variables, queryId: qid };
     if (opts?.features) body.features = opts.features;
     if (opts?.fieldToggles) body.fieldToggles = opts.fieldToggles;
+    const headers = await this.getJsonHeadersAsync('POST', url);
     const response = await this.fetchWithTimeout(url, {
       method: 'POST',
-      headers: this.getJsonHeaders(),
+      headers,
       body: JSON.stringify(body),
     });
     if (!response.ok) {
@@ -214,9 +284,10 @@ export class TwitterClientBase {
 
   async apiGet(urlPath: string): Promise<any> {
     const url = `${API_BASE}${urlPath}`;
+    const headers = await this.getJsonHeadersAsync('GET', url);
     const response = await this.fetchWithTimeout(url, {
       method: 'GET',
-      headers: this.getHeaders(),
+      headers,
     });
     if (!response.ok) {
       const text = await response.text().catch(() => '');
@@ -230,10 +301,8 @@ export class TwitterClientBase {
 
   async apiPost(urlPath: string, body: string, contentType?: string): Promise<any> {
     const url = `${API_BASE}${urlPath}`;
-    const headers = {
-      ...this.getHeaders(),
-      'Content-Type': contentType ?? 'application/x-www-form-urlencoded',
-    };
+    const headers = await this.getJsonHeadersAsync('POST', url);
+    headers['Content-Type'] = contentType ?? 'application/x-www-form-urlencoded';
     const response = await this.fetchWithTimeout(url, {
       method: 'POST',
       headers,

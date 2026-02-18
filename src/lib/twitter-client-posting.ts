@@ -49,13 +49,19 @@ export function PostingMixin<TBase extends Constructor<TwitterClientBase>>(Base:
     async createTweet(variables: Record<string, any>, features: Record<string, boolean>): Promise<any> {
       await this.ensureClientUserId();
 
+      // Timing jitter: 2-5s random delay before write operations
+      if (!this.noJitter) {
+        await this.sleep(2000 + Math.random() * 3000);
+      }
+
       let queryId = await this.getQueryId('CreateTweet');
       let urlWithOperation = `${GRAPHQL_API_BASE}/${queryId}/CreateTweet`;
       const buildBody = () => JSON.stringify({ variables, features, queryId });
       let body = buildBody();
 
       try {
-        const headers = { ...this.getHeaders(), referer: 'https://x.com/compose/post' };
+        const headers = await this.getJsonHeadersAsync('POST', urlWithOperation);
+        headers['referer'] = 'https://x.com/compose/post';
         let response = await this.fetchWithTimeout(urlWithOperation, {
           method: 'POST',
           headers,
@@ -68,17 +74,21 @@ export function PostingMixin<TBase extends Constructor<TwitterClientBase>>(Base:
           queryId = await this.getQueryId('CreateTweet');
           urlWithOperation = `${GRAPHQL_API_BASE}/${queryId}/CreateTweet`;
           body = buildBody();
+          const retryHeaders = await this.getJsonHeadersAsync('POST', urlWithOperation);
+          retryHeaders['referer'] = 'https://x.com/compose/post';
           response = await this.fetchWithTimeout(urlWithOperation, {
             method: 'POST',
-            headers: { ...this.getHeaders(), referer: 'https://x.com/compose/post' },
+            headers: retryHeaders,
             body,
           });
 
           // If still 404, try generic graphql POST endpoint
           if (response.status === 404) {
+            const fallbackHeaders = await this.getJsonHeadersAsync('POST', GRAPHQL_POST_URL);
+            fallbackHeaders['referer'] = 'https://x.com/compose/post';
             const retry = await this.fetchWithTimeout(GRAPHQL_POST_URL, {
               method: 'POST',
-              headers: { ...this.getHeaders(), referer: 'https://x.com/compose/post' },
+              headers: fallbackHeaders,
               body,
             });
             if (!retry.ok) {
@@ -154,13 +164,12 @@ export function PostingMixin<TBase extends Constructor<TwitterClientBase>>(Base:
       }
 
       try {
+        const headers = await this.getBaseHeadersAsync('POST', STATUS_UPDATE_URL);
+        headers['content-type'] = 'application/x-www-form-urlencoded';
+        headers['referer'] = 'https://x.com/compose/post';
         const response = await this.fetchWithTimeout(STATUS_UPDATE_URL, {
           method: 'POST',
-          headers: {
-            ...this.getBaseHeaders(),
-            'content-type': 'application/x-www-form-urlencoded',
-            referer: 'https://x.com/compose/post',
-          },
+          headers,
           body: params.toString(),
         });
 

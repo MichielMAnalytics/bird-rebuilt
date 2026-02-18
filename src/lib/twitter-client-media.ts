@@ -25,10 +25,8 @@ export function MediaMixin<TBase extends Constructor<TwitterClientBase>>(Base: T
         media_type: mimeType,
       });
 
-      const initHeaders = {
-        ...this.getHeaders(),
-        'Content-Type': 'application/x-www-form-urlencoded',
-      };
+      const initHeaders = await this.getBaseHeadersAsync('POST', UPLOAD_API_BASE);
+      initHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
 
       const initResponse = await this.fetchWithTimeout(UPLOAD_API_BASE, {
         method: 'POST',
@@ -80,10 +78,8 @@ export function MediaMixin<TBase extends Constructor<TwitterClientBase>>(Base: T
 
         const body = parts.join('\r\n');
 
-        const appendHeaders = {
-          ...this.getHeaders(),
-          'Content-Type': `multipart/form-data; boundary=${boundary}`,
-        };
+        const appendHeaders = await this.getBaseHeadersAsync('POST', UPLOAD_API_BASE);
+        appendHeaders['Content-Type'] = `multipart/form-data; boundary=${boundary}`;
 
         const appendResponse = await this.fetchWithTimeout(UPLOAD_API_BASE, {
           method: 'POST',
@@ -107,10 +103,8 @@ export function MediaMixin<TBase extends Constructor<TwitterClientBase>>(Base: T
         media_id: mediaId,
       });
 
-      const finalizeHeaders = {
-        ...this.getHeaders(),
-        'Content-Type': 'application/x-www-form-urlencoded',
-      };
+      const finalizeHeaders = await this.getBaseHeadersAsync('POST', UPLOAD_API_BASE);
+      finalizeHeaders['Content-Type'] = 'application/x-www-form-urlencoded';
 
       const finalizeResponse = await this.fetchWithTimeout(UPLOAD_API_BASE, {
         method: 'POST',
@@ -138,9 +132,10 @@ export function MediaMixin<TBase extends Constructor<TwitterClientBase>>(Base: T
       const maxAttempts = 30;
 
       for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const headers = await this.getJsonHeadersAsync('GET', checkUrl);
         const statusResponse = await this.fetchWithTimeout(checkUrl, {
           method: 'GET',
-          headers: this.getHeaders(),
+          headers,
         });
 
         if (!statusResponse.ok) {
