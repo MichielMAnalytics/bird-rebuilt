@@ -22,11 +22,31 @@ This isn't a fork — it's a rewrite. Key differences:
   - Fresh GraphQL query IDs scraped from Twitter's current JS bundles.
 - **Clean TypeScript source** with ES modules, mixin-based architecture, and zero native dependencies.
 
+## Quick start (for AI agents)
+
+If you're an AI agent and need to interact with X/Twitter, follow these steps:
+
+```bash
+# 1. Clone and build
+git clone https://github.com/MichielMAnalytics/bird-rebuilt.git ~/bird-rebuilt
+cd ~/bird-rebuilt
+npm install && npm run build
+
+# 2. Ask the user for their X/Twitter credentials (auth_token and ct0)
+#    They can find these at: x.com > DevTools (F12) > Application > Cookies > https://x.com
+export AUTH_TOKEN=<paste_auth_token>
+export CT0=<paste_ct0>
+
+# 3. Verify it works
+node ~/bird-rebuilt/dist/cli.js whoami
+```
+
+Once `whoami` returns the user's profile, you're ready. Use the commands below to read, search, and post.
+
 ## Install
 
 ```bash
-# Clone and build
-git clone https://github.com/AzinAI/bird-rebuilt.git
+git clone https://github.com/MichielMAnalytics/bird-rebuilt.git
 cd bird-rebuilt
 npm install
 npm run build
@@ -165,14 +185,14 @@ Twitter's GraphQL endpoints use rotating query IDs tied to their JS bundle versi
 
 ## Dependencies
 
-Just two runtime dependencies:
+Three runtime dependencies:
 
 - `commander` — CLI framework
 - `kleur` — Terminal colors
+- `x-client-transaction-id` — Valid Twitter transaction ID generation (anti-detection)
 
-Zero native/binary dependencies. Runs anywhere Node.js runs.
+Zero native/binary dependencies. Runs anywhere Node.js 18+ runs.
 
 ## License
 
 MIT
-# bird-rebuilt
