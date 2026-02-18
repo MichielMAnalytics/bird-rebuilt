@@ -177,7 +177,7 @@ export function buildTweetCreateFeatures(): Record<string, boolean> {
   const features: Record<string, boolean> = {
     rweb_video_screen_enabled: true,
     profile_label_improvements_pcf_label_in_post_enabled: true,
-    responsive_web_profile_redirect_enabled: true,
+    responsive_web_profile_redirect_enabled: false,
     rweb_tipjar_consumption_enabled: true,
     verified_phone_label_enabled: false,
     creator_subscriptions_tweet_preview_api_enabled: true,

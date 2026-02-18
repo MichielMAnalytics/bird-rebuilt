@@ -89,13 +89,6 @@ export class TwitterClientBase {
       'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
       'origin': 'https://x.com',
       'referer': 'https://x.com/',
-      // Browser fingerprint headers
-      'sec-ch-ua': '"Chromium";v="131", "Google Chrome";v="131", "Not_A Brand";v="24"',
-      'sec-ch-ua-mobile': '?0',
-      'sec-ch-ua-platform': '"macOS"',
-      'sec-fetch-dest': 'empty',
-      'sec-fetch-mode': 'cors',
-      'sec-fetch-site': 'same-origin',
     };
     if (this.clientUserId) {
       headers['x-twitter-client-user-id'] = this.clientUserId;
@@ -131,7 +124,30 @@ export class TwitterClientBase {
 
   async ensureClientUserId(): Promise<void> {
     if (this.clientUserId) return;
-    // Will be overridden by UsersMixin or PostingMixin
+    // Use REST endpoint like steipete — avoids GraphQL rate limit buckets
+    const urls = [
+      'https://x.com/i/api/account/settings.json',
+      'https://api.twitter.com/1.1/account/settings.json',
+      'https://x.com/i/api/account/verify_credentials.json?skip_status=true&include_entities=false',
+    ];
+    for (const url of urls) {
+      try {
+        const response = await this.fetchWithTimeout(url, {
+          method: 'GET',
+          headers: this.getHeaders(),
+        });
+        if (!response.ok) continue;
+        const data = await response.json() as any;
+        const userId =
+          data?.user_id ?? data?.user_id_str ?? data?.user?.id_str ?? data?.user?.id;
+        if (userId) {
+          this.clientUserId = String(userId);
+          return;
+        }
+      } catch {
+        continue;
+      }
+    }
   }
 
   // ---------------------------------------------------------------------------

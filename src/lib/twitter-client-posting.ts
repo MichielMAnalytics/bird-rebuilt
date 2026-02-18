@@ -1,27 +1,11 @@
 import { TwitterClientBase } from './twitter-client-base.js';
-import { MAX_TWEET_LENGTH } from './twitter-client-constants.js';
-import { parseUserResult } from './twitter-client-utils.js';
-import { buildTweetCreateFeatures, buildArticleFeatures } from './twitter-client-features.js';
+import { GRAPHQL_API_BASE, GRAPHQL_POST_URL, STATUS_UPDATE_URL, MAX_TWEET_LENGTH } from './twitter-client-constants.js';
+import { buildTweetCreateFeatures } from './twitter-client-features.js';
 
 type Constructor<T = {}> = new (...args: any[]) => T;
 
 export function PostingMixin<TBase extends Constructor<TwitterClientBase>>(Base: TBase) {
   return class extends Base {
-    async ensureClientUserId(): Promise<void> {
-      if (this.clientUserId) return;
-      try {
-        const features = buildArticleFeatures();
-        const data = await this.graphqlGet('Viewer', {}, { features });
-        const result = data?.data?.viewer?.user_results?.result;
-        const user = parseUserResult(result);
-        if (user?.id) {
-          this.clientUserId = user.id;
-        }
-      } catch {
-        // Non-fatal — posting may still work without it
-      }
-    }
-
     async tweet(text: string, mediaIds?: string[]): Promise<any> {
       if (text.length > MAX_TWEET_LENGTH) {
         throw new Error(`Tweet text exceeds maximum length of ${MAX_TWEET_LENGTH} characters`);
@@ -36,8 +20,8 @@ export function PostingMixin<TBase extends Constructor<TwitterClientBase>>(Base:
         },
         semantic_annotation_ids: [],
       };
-
-      return this.createTweet(variables);
+      const features = buildTweetCreateFeatures();
+      return this.createTweet(variables, features);
     }
 
     async reply(tweetId: string, text: string, mediaIds?: string[]): Promise<any> {
@@ -47,114 +31,154 @@ export function PostingMixin<TBase extends Constructor<TwitterClientBase>>(Base:
 
       const variables: Record<string, any> = {
         tweet_text: text,
-        dark_request: false,
         reply: {
           in_reply_to_tweet_id: tweetId,
           exclude_reply_user_ids: [],
         },
+        dark_request: false,
         media: {
           media_entities: (mediaIds ?? []).map((id) => ({ media_id: id, tagged_users: [] })),
           possibly_sensitive: false,
         },
         semantic_annotation_ids: [],
       };
-
-      return this.createTweet(variables);
+      const features = buildTweetCreateFeatures();
+      return this.createTweet(variables, features);
     }
 
-    async createTweet(variables: Record<string, any>): Promise<any> {
+    async createTweet(variables: Record<string, any>, features: Record<string, boolean>): Promise<any> {
       await this.ensureClientUserId();
-      const features = buildTweetCreateFeatures();
 
-      // First attempt
+      let queryId = await this.getQueryId('CreateTweet');
+      let urlWithOperation = `${GRAPHQL_API_BASE}/${queryId}/CreateTweet`;
+      const buildBody = () => JSON.stringify({ variables, features, queryId });
+      let body = buildBody();
+
       try {
-        const data = await this.graphqlPost('CreateTweet', variables, { features });
-        return this.handleCreateTweetResponse(data, variables);
-      } catch (err: any) {
-        if (this.isQueryIdMismatch(err)) {
-          // Stale query ID — refresh and retry
+        const headers = { ...this.getHeaders(), referer: 'https://x.com/compose/post' };
+        let response = await this.fetchWithTimeout(urlWithOperation, {
+          method: 'POST',
+          headers,
+          body,
+        });
+
+        // If 404, refresh query IDs and retry
+        if (response.status === 404) {
           await this.refreshQueryIds();
-          try {
-            const data = await this.graphqlPost('CreateTweet', variables, { features });
-            return this.handleCreateTweetResponse(data, variables);
-          } catch (retryErr: any) {
-            // If retry also fails, try REST
-            return await this.statusUpdateFallbackOrThrow(variables, retryErr);
+          queryId = await this.getQueryId('CreateTweet');
+          urlWithOperation = `${GRAPHQL_API_BASE}/${queryId}/CreateTweet`;
+          body = buildBody();
+          response = await this.fetchWithTimeout(urlWithOperation, {
+            method: 'POST',
+            headers: { ...this.getHeaders(), referer: 'https://x.com/compose/post' },
+            body,
+          });
+
+          // If still 404, try generic graphql POST endpoint
+          if (response.status === 404) {
+            const retry = await this.fetchWithTimeout(GRAPHQL_POST_URL, {
+              method: 'POST',
+              headers: { ...this.getHeaders(), referer: 'https://x.com/compose/post' },
+              body,
+            });
+            if (!retry.ok) {
+              const text = await retry.text();
+              return { success: false, error: `HTTP ${retry.status}: ${text.slice(0, 200)}` };
+            }
+            const data = await retry.json() as any;
+            if (data.errors?.length > 0) {
+              const fallback = await this.tryStatusUpdateFallback(data.errors, variables);
+              if (fallback) return fallback;
+              return { success: false, error: this.formatErrors(data.errors) };
+            }
+            const tweetId = data.data?.create_tweet?.tweet_results?.result?.rest_id;
+            if (tweetId) return { success: true, tweetId };
+            return { success: false, error: 'Tweet created but no ID returned' };
           }
         }
-        // Check for error 226 in response body
-        return await this.statusUpdateFallbackOrThrow(variables, err);
+
+        if (!response.ok) {
+          const text = await response.text();
+          return { success: false, error: `HTTP ${response.status}: ${text.slice(0, 200)}` };
+        }
+
+        const data = await response.json() as any;
+        if (data.errors?.length > 0) {
+          const fallback = await this.tryStatusUpdateFallback(data.errors, variables);
+          if (fallback) return fallback;
+          return { success: false, error: this.formatErrors(data.errors) };
+        }
+
+        const tweetId = data.data?.create_tweet?.tweet_results?.result?.rest_id;
+        if (tweetId) return { success: true, tweetId };
+        return { success: false, error: 'Tweet created but no ID returned' };
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
       }
     }
 
-    handleCreateTweetResponse(data: any, variables: Record<string, any>): any {
-      if (!data.errors?.length) return data;
-
-      // Error 226 = "looks automated" — try REST v1.1 fallback
-      const has226 = data.errors.some(
-        (e: any) => e.extensions?.code === 226 || e.code === 226
-      );
-      if (has226) {
-        // Will be handled by caller's catch
-        const err: any = new Error('Error 226: This request looks automated');
-        err.is226 = true;
-        err.data = data;
-        throw err;
-      }
-
-      const msg = data.errors.map((e: any) => e.message).join('; ');
-      throw new Error(msg);
+    formatErrors(errors: any[]): string {
+      return errors
+        .map((e: any) => (typeof e.code === 'number' ? `${e.message} (${e.code})` : e.message))
+        .join(', ');
     }
 
-    async statusUpdateFallbackOrThrow(
-      variables: Record<string, any>,
-      err: any
+    async tryStatusUpdateFallback(errors: any[], variables: Record<string, any>): Promise<any | null> {
+      if (!errors.some((e: any) => e.code === 226)) return null;
+
+      const text = typeof variables.tweet_text === 'string' ? variables.tweet_text : null;
+      if (!text) return null;
+
+      return this.postStatusUpdate(text, variables.reply?.in_reply_to_tweet_id, variables.media?.media_entities);
+    }
+
+    async postStatusUpdate(
+      text: string,
+      inReplyToTweetId?: string,
+      mediaEntities?: any[]
     ): Promise<any> {
-      // Check if this is a 226 error that might benefit from REST fallback
-      const is226 =
-        err?.is226 ||
-        err?.message?.includes('226') ||
-        err?.responseBody?.includes('226');
-      if (is226) {
-        const fallback = await this.statusUpdateFallback(variables);
-        if (fallback) return fallback;
-      }
-      throw err;
-    }
-
-    async statusUpdateFallback(variables: Record<string, any>): Promise<any | null> {
-      const text = variables.tweet_text;
-      if (typeof text !== 'string') return null;
-
       const params = new URLSearchParams();
       params.set('status', text);
 
-      const reply = variables.reply;
-      if (reply?.in_reply_to_tweet_id) {
-        params.set('in_reply_to_status_id', reply.in_reply_to_tweet_id);
+      if (inReplyToTweetId) {
+        params.set('in_reply_to_status_id', inReplyToTweetId);
         params.set('auto_populate_reply_metadata', 'true');
       }
 
-      const mediaEntities = variables.media?.media_entities;
       if (Array.isArray(mediaEntities) && mediaEntities.length > 0) {
-        const ids = mediaEntities.map((e: any) => e.media_id).filter(Boolean);
+        const ids = mediaEntities
+          .map((e: any) => e?.media_id)
+          .filter(Boolean)
+          .map(String);
         if (ids.length > 0) params.set('media_ids', ids.join(','));
       }
 
       try {
-        const data = await this.apiPost('/1.1/statuses/update.json', params.toString());
-        const tweetId = data.id_str ?? String(data.id ?? '');
-        return {
-          data: {
-            create_tweet: {
-              tweet_results: {
-                result: { rest_id: tweetId || undefined },
-              },
-            },
+        const response = await this.fetchWithTimeout(STATUS_UPDATE_URL, {
+          method: 'POST',
+          headers: {
+            ...this.getBaseHeaders(),
+            'content-type': 'application/x-www-form-urlencoded',
+            referer: 'https://x.com/compose/post',
           },
-        };
-      } catch {
-        return null;
+          body: params.toString(),
+        });
+
+        if (!response.ok) {
+          const text = await response.text();
+          return { success: false, error: `HTTP ${response.status}: ${text.slice(0, 200)}` };
+        }
+
+        const data = await response.json() as any;
+        if (data.errors?.length > 0) {
+          return { success: false, error: this.formatErrors(data.errors) };
+        }
+
+        const tweetId = typeof data.id_str === 'string' ? data.id_str : data.id !== undefined ? String(data.id) : undefined;
+        if (tweetId) return { success: true, tweetId };
+        return { success: false, error: 'Tweet created but no ID returned' };
+      } catch (error) {
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
       }
     }
   };

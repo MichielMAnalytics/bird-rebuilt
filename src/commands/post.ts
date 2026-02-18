@@ -26,18 +26,14 @@ export function registerPostCommands(program: Command): void {
           }
         }
         const result = await ctx.client.tweet(text, mediaIds);
-        if (result?.errors?.length) {
-          throw new Error(result.errors[0].message);
-        }
         if (ctx.json) {
           outputResult(result, true);
+        } else if (result?.success && result.tweetId) {
+          printSuccess(`Tweet posted: https://x.com/i/status/${result.tweetId}`);
+        } else if (result?.error) {
+          throw new Error(result.error);
         } else {
-          const tweetId = result?.data?.create_tweet?.tweet_results?.result?.rest_id;
-          if (tweetId) {
-            printSuccess(`Tweet posted: https://x.com/i/status/${tweetId}`);
-          } else {
-            printSuccess('Tweet may not have posted — Twitter returned an empty response (possible anti-spam throttle). Check your profile to verify.');
-          }
+          printSuccess('Tweet may not have posted — Twitter returned an empty response. Check your profile to verify.');
         }
       } catch (err) {
         handleError(err);
@@ -67,18 +63,14 @@ export function registerPostCommands(program: Command): void {
           }
         }
         const result = await ctx.client.reply(tweetId, text, mediaIds);
-        if (result?.errors?.length) {
-          throw new Error(result.errors[0].message);
-        }
         if (ctx.json) {
           outputResult(result, true);
+        } else if (result?.success && result.tweetId) {
+          printSuccess(`Reply posted: https://x.com/i/status/${result.tweetId}`);
+        } else if (result?.error) {
+          throw new Error(result.error);
         } else {
-          const replyId = result?.data?.create_tweet?.tweet_results?.result?.rest_id;
-          if (replyId) {
-            printSuccess(`Reply posted: https://x.com/i/status/${replyId}`);
-          } else {
-            printSuccess('Reply may not have posted — Twitter returned an empty response (possible anti-spam throttle). Check the thread to verify.');
-          }
+          printSuccess('Reply may not have posted — Twitter returned an empty response. Check the thread to verify.');
         }
       } catch (err) {
         handleError(err);
