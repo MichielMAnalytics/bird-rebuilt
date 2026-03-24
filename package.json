@@ -24,7 +24,7 @@
   "dependencies": {
     "commander": "^13.1.0",
     "kleur": "^4.1.5",
-    "x-client-transaction-id": "^0.1.9"
+    "x-client-transaction-id": "^0.2.0"
   },
   "devDependencies": {
     "@types/node": "^22.12.0",
