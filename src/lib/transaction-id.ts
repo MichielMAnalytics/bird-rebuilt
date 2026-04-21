@@ -19,8 +19,13 @@ async function ensureInitialized(): Promise<void> {
         clientTransaction = await ClientTransaction.create(document);
         lastInitAt = Date.now();
       } catch (err) {
-        console.error('[transaction-id] Failed to initialize:', (err as Error).message);
-        // Keep old instance if we had one; otherwise leave null for fallback
+        // If x-client-transaction-id's scrape breaks (Twitter keeps
+        // shifting how the ondemand chunk is referenced), fall through
+        // to the random-hex transaction ID below. Only log under DEBUG
+        // so the CLI stays quiet on a working fallback.
+        if (process.env.DEBUG) {
+          console.error('[transaction-id] Failed to initialize, using random-hex fallback:', (err as Error).message);
+        }
       }
     })();
   }
