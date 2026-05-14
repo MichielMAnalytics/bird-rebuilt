@@ -302,7 +302,7 @@ export class TwitterClientBase {
   async apiPost(urlPath: string, body: string, contentType?: string): Promise<any> {
     const url = `${API_BASE}${urlPath}`;
     const headers = await this.getJsonHeadersAsync('POST', url);
-    headers['Content-Type'] = contentType ?? 'application/x-www-form-urlencoded';
+    headers['content-type'] = contentType ?? 'application/x-www-form-urlencoded';
     const response = await this.fetchWithTimeout(url, {
       method: 'POST',
       headers,

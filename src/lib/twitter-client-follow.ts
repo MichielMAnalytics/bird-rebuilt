@@ -15,15 +15,29 @@ type Constructor<T = {}> = new (...args: any[]) => T;
 export function FollowMixin<TBase extends Constructor<TwitterClientBase>>(Base: TBase) {
   return class extends Base {
     async follow(userId: string): Promise<any> {
+      const extraParams = [
+        'include_profile_interstitial_type=1',
+        'include_blocking=1',
+        'include_blocked_by=1',
+        'include_followed_by=1',
+        'include_want_retweets=1',
+        'include_mute_edge=1',
+        'include_can_dm=1',
+        'include_can_media_tag=1',
+        'include_ext_is_blue_verified=1',
+        'include_ext_verified_type=1',
+        'include_ext_profile_image_shape=1',
+        `user_id=${userId}`,
+      ].join('&');
+
       // REST first (more reliable for mutations)
       try {
-        return await this.apiPost('/1.1/friendships/create.json', `user_id=${userId}`);
+        return await this.apiPost('/1.1/friendships/create.json', extraParams);
       } catch (err: any) {
         const code = this.extractTwitterErrorCode(err);
         if (code === 160) return { already_following: true };
         if (code === 162) throw new Error('Cannot follow: you are blocked by this user');
-        if (code === 108) throw new Error('Cannot follow: user not found');
-        // REST failed — try GraphQL fallback
+        // other errors — fall through to GraphQL
       }
 
       // GraphQL fallback
