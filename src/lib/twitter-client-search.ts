@@ -36,10 +36,13 @@ export function SearchMixin<TBase extends Constructor<TwitterClientBase>>(Base: 
 
       const queryIds = await this.getSearchTimelineQueryIds();
 
-      // Loop through query IDs
+      // Loop through query IDs.
+      // NOTE: SearchTimeline switched from GET to POST in Twitter's 2026 API.
+      // Using graphqlGet here returns HTTP 404 (which isQueryIdMismatch
+      // misreads as a stale query ID, exhausting the loop). Must POST.
       for (const queryId of queryIds) {
         try {
-          const data = await this.graphqlGet('SearchTimeline', variables, {
+          const data = await this.graphqlPost('SearchTimeline', variables, {
             queryId,
             features,
             fieldToggles,
@@ -68,7 +71,7 @@ export function SearchMixin<TBase extends Constructor<TwitterClientBase>>(Base: 
       // All IDs exhausted — refresh and retry
       await this.refreshQueryIds();
       const freshId = await this.getQueryId('SearchTimeline');
-      const data = await this.graphqlGet('SearchTimeline', variables, {
+      const data = await this.graphqlPost('SearchTimeline', variables, {
         queryId: freshId,
         features,
         fieldToggles,
